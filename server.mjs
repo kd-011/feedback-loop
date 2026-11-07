@@ -1,8 +1,7 @@
 import { createServer } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, existsSync, mkdirSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import { dirname, join, extname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 
@@ -16,76 +15,32 @@ if (existsSync(envFile)) {
 }
 
 const PORT = Number(process.env.FEEDBACK_LOOP_PORT || 8956);
-const PIN = process.env.FEEDBACK_LOOP_PIN || '';
-if (!PIN) { console.error('FEEDBACK_LOOP_PIN missing, refusing to start unauthenticated'); process.exit(1); }
-const TOKEN = createHash('sha256').update(`feedback-loop:${PIN}`).digest('hex');
+const SECRET = process.env.FEEDBACK_LOOP_SECRET || '';
+if (!SECRET) { console.error('FEEDBACK_LOOP_SECRET missing, refusing to start'); process.exit(1); }
 
 const CLAUDE = process.env.CLAUDE_PATH || 'claude';
 const CLAUDE_TIMEOUT_S = Number(process.env.CLAUDE_TIMEOUT_S || 600);
 const CLAUDE_SKIP = process.env.CLAUDE_SKIP_PERMISSIONS === 'true';
 
-const PUBLIC = join(ROOT, 'public');
 mkdirSync(join(ROOT, 'data'), { recursive: true });
 const db = new DatabaseSync(join(ROOT, 'data', 'feedback-loop.db'));
 db.exec('PRAGMA journal_mode = WAL;');
-db.exec(`CREATE TABLE IF NOT EXISTS items (
+db.exec(`CREATE TABLE IF NOT EXISTS jobs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind TEXT NOT NULL DEFAULT 'bug',
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   repo_path TEXT NOT NULL,
+  source TEXT DEFAULT '',
   status TEXT NOT NULL DEFAULT 'pending',
   session_id TEXT,
   result TEXT,
   error TEXT,
-  source TEXT DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 )`);
 
-const MIME = {
-  '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
-  '.webmanifest': 'application/manifest+json',
-};
-
-const RATE_WINDOW_MS = 60_000;
-const RATE_MAX = 20;
-const rates = new Map();
-
-function authed(req) {
-  const cookie = req.headers.cookie;
-  if (!cookie) return false;
-  for (const part of cookie.split(';')) {
-    const [k, v] = part.trim().split('=');
-    if (k === 'fl' && v === TOKEN) return true;
-  }
-  return false;
-}
-
-function body(req) {
-  return new Promise((resolve) => {
-    let data = '';
-    req.on('data', (c) => data += c);
-    req.on('end', () => {
-      try { resolve(JSON.parse(data)); } catch { resolve({}); }
-    });
-  });
-}
-
-function serveStatic(res, path) {
-  const full = join(PUBLIC, path);
-  if (!existsSync(full) || !full.startsWith(PUBLIC)) { res.writeHead(404); res.end('not found'); return; }
-  const ext = extname(path);
-  const type = MIME[ext] || 'application/octet-stream';
-  const data = readFileSync(full);
-  res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache' });
-  res.end(data);
-}
-
-function json(res, data, status = 200) {
-  res.writeHead(status, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(data));
-}
+let running = false;
 
 function resolvePath(raw) {
   let p = raw.trim();
@@ -95,37 +50,39 @@ function resolvePath(raw) {
 }
 
 function claudeArgs(prompt) {
-  const args = ['-p', prompt, '--output-format', 'json', '--allowedTools', 'Read,Edit,Bash'];
+  const args = ['-p', prompt, '--output-format', 'json', '--allowedTools', 'Read,Edit,Bash,Grep,Glob'];
   if (CLAUDE_SKIP) args.push('--dangerously-skip-permissions');
   return args;
 }
 
-let running = false;
-
 function tick() {
   if (running) return;
-  const row = db.prepare("SELECT * FROM items WHERE status = 'pending' ORDER BY created_at ASC LIMIT 1").all();
+  const row = db.prepare("SELECT * FROM jobs WHERE status = 'pending' ORDER BY created_at ASC LIMIT 1").all();
   if (row.length === 0) return;
-  const item = row[0];
+  const job = row[0];
   running = true;
 
-  db.prepare("UPDATE items SET status = 'running', updated_at = datetime('now'), error = NULL WHERE id = ?").run(item.id);
+  db.prepare("UPDATE jobs SET status = 'running', updated_at = datetime('now'), error = NULL WHERE id = ?").run(job.id);
 
-  const repoPath = resolvePath(item.repo_path);
+  const repoPath = resolvePath(job.repo_path);
   if (!existsSync(repoPath)) {
-    db.prepare("UPDATE items SET status = 'failed', error = ?, updated_at = datetime('now') WHERE id = ?")
-      .run(`Repo path not found: ${repoPath}`, item.id);
+    db.prepare("UPDATE jobs SET status = 'failed', error = ?, updated_at = datetime('now') WHERE id = ?")
+      .run(`Repo path not found: ${repoPath}`, job.id);
     running = false;
     return;
   }
 
-  const prompt = `A user reported this bug or feedback in the repo you are working in. Investigate and fix it:
+  const kindLabel = job.kind === 'error' ? 'an error' : 'a bug';
+  const stackNote = job.kind === 'error'
+    ? '\nFocus on the stack trace to find the root cause. Fix the actual bug, not the symptom.'
+    : '';
 
-Title: ${item.title}
-Description: ${item.description}
+  const prompt = `${kindLabel} was reported in this repo:
 
-${item.source ? `Reported via: ${item.source}` : ''}
-Find the root cause in the codebase, implement the fix, and verify it works. Do not make unrelated changes.`;
+Title: ${job.title}
+Description: ${job.description}${stackNote}
+
+Investigate the codebase. Find the root cause. Implement the fix. Verify it works. Commit the fix with a clear commit message. Do not make unrelated changes.`;
 
   let stdout = '';
   let stderr = '';
@@ -141,58 +98,135 @@ Find the root cause in the codebase, implement the fix, and verify it works. Do 
   proc.on('close', (code) => {
     if (code !== 0) {
       const errMsg = stderr || `claude exited with code ${code}`;
-      db.prepare("UPDATE items SET status = 'failed', error = ?, updated_at = datetime('now') WHERE id = ?")
-        .run(errMsg.slice(0, 2000), item.id);
+      db.prepare("UPDATE jobs SET status = 'failed', error = ?, updated_at = datetime('now') WHERE id = ?")
+        .run(errMsg.slice(0, 2000), job.id);
     } else {
       let sessionId = null;
-      try {
-        const out = JSON.parse(stdout);
-        sessionId = out.session_id || null;
-      } catch {}
-      db.prepare("UPDATE items SET status = 'completed', session_id = ?, result = ?, updated_at = datetime('now') WHERE id = ?")
-        .run(sessionId, stdout.slice(0, 8000), item.id);
+      try { sessionId = JSON.parse(stdout).session_id || null; } catch {}
+      db.prepare("UPDATE jobs SET status = 'completed', session_id = ?, result = ?, updated_at = datetime('now') WHERE id = ?")
+        .run(sessionId, stdout.slice(0, 8000), job.id);
     }
     running = false;
   });
 
   proc.on('error', (err) => {
-    db.prepare("UPDATE items SET status = 'failed', error = ?, updated_at = datetime('now') WHERE id = ?")
-      .run(`Failed to start ${CLAUDE}: ${err.message}. Is Claude Code installed?`, item.id);
+    db.prepare("UPDATE jobs SET status = 'failed', error = ?, updated_at = datetime('now') WHERE id = ?")
+      .run(`Failed to start ${CLAUDE}: ${err.message}`, job.id);
     running = false;
   });
 }
 
 setInterval(tick, 5000);
 
-const LOGIN_HTML = `<!DOCTYPE html>
+function body(req) {
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', (c) => data += c);
+    req.on('end', () => {
+      try { resolve(JSON.parse(data)); } catch { resolve({}); }
+    });
+  });
+}
+
+function json(res, data, status = 200) {
+  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(data));
+}
+
+function renderJobs() {
+  const items = db.prepare("SELECT * FROM jobs ORDER BY created_at DESC LIMIT 30").all();
+  if (items.length === 0) return '<p>No jobs yet.</p>';
+  const counts = { pending: 0, running: 0, completed: 0, failed: 0 };
+  for (const j of items) counts[j.status] = (counts[j.status] || 0) + 1;
+
+  let html = `<div class="counts">
+    <span class="dot pending"></span>${counts.pending} pending
+    <span class="dot running"></span>${counts.running} running
+    <span class="dot completed"></span>${counts.completed} done
+    <span class="dot failed"></span>${counts.failed} failed
+  </div>`;
+
+  for (const j of items) {
+    html += `<div class="job ${j.status}">
+      <div class="job-top"><span class="job-title">${esc(j.title)}</span><span class="badge ${j.status}">${j.status}</span></div>
+      <div class="job-meta">${esc(j.repo_path)} · ${j.kind}${j.source ? ' · ' + esc(j.source) : ''} · ${ago(j.created_at)}</div>
+      <div class="job-desc">${esc(j.description.slice(0, 300))}${j.description.length > 300 ? '…' : ''}</div>
+      ${j.error ? '<div class="job-error">' + esc(j.error) + '</div>' : ''}
+      ${j.session_id ? '<div class="job-session">session ' + esc(j.session_id) + '</div>' : ''}
+      ${j.result ? '<details><summary>Result</summary><pre>' + esc(parseResult(j.result)) + '</pre></details>' : ''}
+    </div>`;
+  }
+  return html;
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function ago(d) {
+  const s = Math.floor((Date.now() - new Date(d + 'Z').getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm';
+  if (s < 86400) return Math.floor(s / 3600) + 'h';
+  return Math.floor(s / 86400) + 'd';
+}
+
+function parseResult(raw) {
+  if (!raw) return '';
+  try {
+    const j = JSON.parse(raw);
+    return j.result || raw;
+  } catch { return raw; }
+}
+
+const STATUS_HTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0e0f14">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Feedback Loop</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%}
-body{background:#0e0f14;color:#e4e4e7;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center}
-form{display:flex;flex-direction:column;gap:16px;width:280px}
-h1{font-size:20px;font-weight:600;text-align:center;color:#fff}
-input{background:#1a1b23;border:1px solid #2a2b36;border-radius:10px;padding:12px 14px;color:#e4e4e7;font-size:15px;outline:none;font-family:inherit}
-input:focus{border-color:#6366f1}
-button{background:#6366f1;color:#fff;border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
-button:hover{background:#5558e6}
-button:active{transform:scale(.97)}
-.err{color:#f87171;font-size:13px;text-align:center;min-height:20px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0e0f14;color:#e4e4e7;font-family:system-ui,-apple-system,sans-serif;padding:20px;max-width:640px;margin:0 auto;line-height:1.5}
+h1{font-size:18px;color:#fff;margin-bottom:4px}
+h2{font-size:12px;color:#6b6b7e;text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px}
+.counts{display:flex;gap:16px;margin-bottom:20px;font-size:13px;color:#a1a1a9}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.dot.pending{background:#a1a1aa}
+.dot.running{background:#818cf8}
+.dot.completed{background:#34d399}
+.dot.failed{background:#f87171}
+.job{background:#1a1b23;border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid #2a2b36}
+.job.pending{border-left-color:#a1a1aa}
+.job.running{border-left-color:#818cf8}
+.job.completed{border-left-color:#34d399}
+.job.failed{border-left-color:#f87171}
+.job-title{font-weight:600;font-size:14px;color:#fff}
+.job-meta{font-size:11px;color:#6b6b7e;margin-top:4px}
+.job-desc{font-size:12px;color:#a1a1a9;margin-top:6px;line-height:1.5;word-break:break-word}
+.job-error{font-size:11px;color:#f87171;margin-top:6px;white-space:pre-wrap;word-break:break-word}
+.job-session{font-size:10px;color:#6b6b7e;margin-top:4px}
+.badge{font-size:10px;font-weight:600;padding:1px 7px;border-radius:6px;text-transform:uppercase;float:right}
+.badge.pending{background:#a1a1aa18;color:#a1a1aa}
+.badge.running{background:#818cf818;color:#818cf8}
+.badge.completed{background:#34d39918;color:#34d399}
+.badge.failed{background:#f8717118;color:#f87171}
+.job-top{display:flex;justify-content:space-between;align-items:flex-start}
+details{margin-top:8px}
+summary{font-size:12px;color:#818cf8;cursor:pointer}
+pre{font-size:11px;color:#a1a1a9;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;margin-top:6px;background:#111218;padding:8px;border-radius:6px}
+@media(max-width:480px){body{padding:12px}}
 </style>
 </head>
 <body>
-<form id="f"><h1>Feedback Loop</h1>
-<input type="password" id="p" placeholder="PIN" autofocus>
-<button type="submit">Unlock</button>
-<div class="err" id="e"></div>
-</form>
-<script>document.getElementById('f').addEventListener('submit',async(e)=>{e.preventDefault()
-try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:document.getElementById('p').value})})
-if(r.ok)location.reload();else document.getElementById('e').textContent='Wrong PIN'}catch{}})</script>
+<h1>Feedback Loop</h1>
+<h2>Claude Code bridge: app bugs and errors → fix + commit</h2>
+<div id="jobs">
+  ${renderJobs()}
+</div>
+<script>
+setInterval(()=>fetch('/api/jobs').then(r=>r.text()).then(h=>{document.getElementById('jobs').innerHTML=h}),5000)
+</script>
 </body>
 </html>`;
 
@@ -201,102 +235,38 @@ function route(req, res) {
   const path = url.pathname;
   const method = req.method;
 
-  const isStatic = /\.(css|js|svg|png|ico|webmanifest)$/.test(path) || path === '/sw.js';
-  if (!isStatic && !authed(req) && path !== '/api/login') {
-    if (path === '/' || path === '/index.html') {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(LOGIN_HTML);
-      return;
-    }
-    json(res, { error: 'not authed' }, 401);
+  if (path === '/' && method === 'GET') {
+    const html = STATUS_HTML.replace(
+      '<div id="jobs">',
+      `<div id="jobs">${renderJobs()}</div>\n<div id="jobs">`
+    ).replace(/\n<div id="jobs">[^]*$/, '');
+    res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
+    res.end(html);
     return;
   }
 
-  if (path === '/api/login' && method === 'POST') {
+  if (path === '/api/job' && method === 'POST') {
     body(req).then((b) => {
-      if (b.pin === PIN) {
-        res.writeHead(200, {
-          'Set-Cookie': `fl=${TOKEN}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax; Secure`,
-          'Content-Type': 'application/json',
-        });
-        res.end(JSON.stringify({ ok: true }));
-      } else {
-        json(res, { error: 'wrong pin' }, 401);
+      if (b.secret !== SECRET) { json(res, { error: 'bad secret' }, 401); return; }
+      if (!b.title || !b.description || !b.repo) {
+        json(res, { error: 'title, description, and repo are required' }, 400);
+        return;
       }
+      const kind = b.kind === 'error' ? 'error' : 'bug';
+      const pending = db.prepare("SELECT COUNT(*) as n FROM jobs WHERE status IN ('pending','running')").get();
+      if (pending.n >= 30) { json(res, { error: 'Queue full' }, 429); return; }
+      const info = db.prepare('INSERT INTO jobs (kind, title, description, repo_path, source) VALUES (?, ?, ?, ?, ?)')
+        .run(kind, b.title, b.description, b.repo.trim(), b.source || '');
+      const row = db.prepare('SELECT id, created_at FROM jobs WHERE id = ?').get(Number(info.lastInsertRowid));
+      json(res, { id: row.id, created_at: row.created_at, status: 'pending' }, 201);
     });
     return;
   }
 
-  if (path === '/api/items' && method === 'GET') {
-    const items = db.prepare("SELECT * FROM items WHERE status != 'archived' ORDER BY created_at DESC LIMIT 50").all();
-    json(res, items);
-    return;
-  }
-
-  if (path === '/api/items' && method === 'POST') {
-    body(req).then((b) => {
-      if (!b.title || !b.description || !b.repo_path) {
-        json(res, { error: 'title, description, and repo_path are required' }, 400);
-        return;
-      }
-      const pending = db.prepare("SELECT COUNT(*) as n FROM items WHERE status IN ('pending','running')").get();
-      if (pending.n >= 20) {
-        json(res, { error: 'Queue full. Wait for items to clear before submitting more.' }, 429);
-        return;
-      }
-      const info = db.prepare('INSERT INTO items (title, description, repo_path, source) VALUES (?, ?, ?, ?) RETURNING id, created_at')
-        .run(b.title, b.description, b.repo_path.trim(), b.source || '');
-      json(res, { id: info[0].id, created_at: info[0].created_at, status: 'pending' }, 201);
-    });
-    return;
-  }
-
-  const m = path.match(/^\/api\/items\/(\d+)(\/(?:run|archive))?$/);
-  if (m) {
-    const id = Number(m[1]);
-    const action = m[2];
-
-    if (method === 'GET') {
-      const item = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
-      if (!item) { json(res, { error: 'not found' }, 404); return; }
-      json(res, item);
-      return;
-    }
-
-    if (action === '/run' && method === 'POST') {
-      db.prepare("UPDATE items SET status = 'pending', error = NULL, updated_at = datetime('now') WHERE id = ? AND status = 'failed'").run(id);
-      json(res, { ok: true });
-      return;
-    }
-
-    if (action === '/archive' && method === 'POST') {
-      db.prepare("UPDATE items SET status = 'archived', updated_at = datetime('now') WHERE id = ?").run(id);
-      json(res, { ok: true });
-      return;
-    }
-  }
-
-  if (path === '/api/webhook' && method === 'POST') {
-    body(req).then((b) => {
-      if (!b.title || !b.description || !b.repo_path) {
-        json(res, { error: 'title, description, and repo_path are required' }, 400);
-        return;
-      }
-      const pending = db.prepare("SELECT COUNT(*) as n FROM items WHERE status IN ('pending','running')").get();
-      if (pending.n >= 20) {
-        json(res, { error: 'Queue full' }, 429);
-        return;
-      }
-      const info = db.prepare('INSERT INTO items (title, description, repo_path, source) VALUES (?, ?, ?, ?) RETURNING id, created_at')
-        .run(b.title, b.description, b.repo_path.trim(), b.source || 'webhook');
-      json(res, { id: info[0].id, created_at: info[0].created_at, status: 'pending' }, 201);
-    });
-    return;
-  }
-
-  if (method === 'GET') {
-    const file = path === '/' ? '/index.html' : path;
-    serveStatic(res, file);
+  if (path === '/api/jobs' && method === 'GET') {
+    const html = renderJobs();
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(html);
     return;
   }
 
