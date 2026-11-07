@@ -21,7 +21,7 @@ your app → POST /api/job → SQLite queue → spawn claude -p → fix + commit
 ## Install
 
 ```bash
-git clone https://github.com/kyledeboo-ctrl/feedback-loop.git
+git clone https://github.com/kd-011/feedback-loop.git
 cd feedback-loop
 cp .env.example .env
 # edit .env: set FEEDBACK_LOOP_SECRET to a random string
