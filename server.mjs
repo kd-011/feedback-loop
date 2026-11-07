@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn } from 'node:child_process';
+import { spawn, execSync } from 'node:child_process';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const envFile = join(ROOT, '.env');
@@ -21,6 +21,15 @@ if (!SECRET) { console.error('FEEDBACK_LOOP_SECRET missing, refusing to start');
 const CLAUDE = process.env.CLAUDE_PATH || 'claude';
 const CLAUDE_TIMEOUT_S = Number(process.env.CLAUDE_TIMEOUT_S || 600);
 const CLAUDE_SKIP = process.env.CLAUDE_SKIP_PERMISSIONS === 'true';
+
+try {
+  execSync(`${CLAUDE} --version`, { stdio: 'pipe', timeout: 5000 });
+  console.log(`claude found: ${CLAUDE}`);
+} catch {
+  console.warn(`WARNING: ${CLAUDE} not found or not working. Jobs will fail until Claude Code is installed and authenticated.`);
+  console.warn('  npm install -g @anthropic-ai/claude-code');
+  console.warn('  claude    (run once to auth)');
+}
 
 mkdirSync(join(ROOT, 'data'), { recursive: true });
 const db = new DatabaseSync(join(ROOT, 'data', 'feedback-loop.db'));

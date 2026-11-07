@@ -1,0 +1,16 @@
+[Unit]
+Description=Feedback Loop: webhook-to-Claude-Code bridge
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=FEEDBACK_LOOP_PORT=8956
+ExecStart=node server.mjs
+WorkingDirectory=%h/projects/feedback-loop
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
