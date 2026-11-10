@@ -1,0 +1,39 @@
+# Syntax check, then a smoke run: the server starts, refuses a bad secret and queues a job.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --check server.mjs
+      - run: bash -n setup.sh
+      - name: Smoke
+        env:
+          FEEDBACK_LOOP_SECRET: ci-secret
+          FEEDBACK_LOOP_PORT: 8956
+          CLAUDE_PATH: /bin/true
+        run: |
+          node server.mjs > server.log 2>&1 &
+          for i in $(seq 1 20); do curl -fs http://127.0.0.1:8956/ > /dev/null && break; sleep 0.5; done
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8956/api/job -H 'content-type: application/json' -d '{"secret":"wrong","title":"t","description":"d","repo":"/tmp"}')
+          test "$code" = 401
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8956/api/job -H 'content-type: application/json' -d '{"secret":"ci-secret","title":"t","description":"d","repo":"/tmp"}')
+          test "$code" = 201
+          kill %1
+      - if: failure()
+        run: cat server.log

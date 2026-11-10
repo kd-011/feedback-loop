@@ -4,6 +4,7 @@ import { readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn, execSync } from 'node:child_process';
+import { timingSafeEqual } from 'node:crypto';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const envFile = join(ROOT, '.env');
@@ -239,6 +240,13 @@ setInterval(()=>fetch('/api/jobs').then(r=>r.text()).then(h=>{document.getElemen
 </body>
 </html>`;
 
+function secretMatches(given) {
+  if (typeof given !== 'string') return false;
+  const a = Buffer.from(given);
+  const b = Buffer.from(SECRET);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 function route(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname;
@@ -256,7 +264,7 @@ function route(req, res) {
 
   if (path === '/api/job' && method === 'POST') {
     body(req).then((b) => {
-      if (b.secret !== SECRET) { json(res, { error: 'bad secret' }, 401); return; }
+      if (!secretMatches(b.secret)) { json(res, { error: 'bad secret' }, 401); return; }
       if (!b.title || !b.description || !b.repo) {
         json(res, { error: 'title, description, and repo are required' }, 400);
         return;
