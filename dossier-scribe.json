@@ -1,0 +1,23 @@
+{
+  "dossiers": "docs/.scribe",
+  "reposRoot": ".",
+  "requireCitations": [
+    "Features",
+    "Components",
+    "Data flow",
+    "Storage",
+    "Auth",
+    "External services",
+    "Commands",
+    "Conventions",
+    "Traps",
+    "Where it runs",
+    "Health",
+    "Backup and restore",
+    "Name and casing",
+    "Copy bank",
+    "Assets",
+    "Contact and legal"
+  ],
+  "collectors": []
+}

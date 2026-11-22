@@ -1,0 +1,1230 @@
+{
+  "version": 1,
+  "docs": {
+    "feedback-loop-agents": {
+      "claims": {
+        "5262a7cce334": {
+          "text": "No install step: zero npm dependencies, no package.json, no build. Needs Node 22.5+ for `node:sqlite` and the Claude Code CLI on PATH.",
+          "line": 15,
+          "specs": [
+            "README.md:21-33",
+            "server.mjs:1-7"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "README.md": {
+              "path": "README.md",
+              "blob": "13167b90d15ad3d51e4774dc393682f7f09fdeec",
+              "commit": "b26bfd8a35b64156a2044c01eb71e06c4a0403ab",
+              "range": {
+                "start": 21,
+                "end": 33,
+                "hash": "ccbcf46ababcde4288fefd99898b3d6890837c39"
+              }
+            },
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 1,
+                "end": 7,
+                "hash": "583d1a43f5691014c187113f25fc32c825b6fd19"
+              }
+            }
+          }
+        },
+        "6dd989495970": {
+          "text": "Run: `node server.mjs`. It refuses to start without `FEEDBACK_LOOP_SECRET`, read from the environment or `.env` beside the script (environment wins).",
+          "line": 16,
+          "specs": [
+            "server.mjs:9-20"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 9,
+                "end": 20,
+                "hash": "be746ec4de142b7c0794a64c2f9401f8d38076fe"
+              }
+            }
+          }
+        },
+        "4df9533673bf": {
+          "text": "Local copy beside the live one: copy `server.mjs` to a temp folder (it writes `data/` next to itself) and run `FEEDBACK_LOOP_SECRET=s FEEDBACK_LOOP_PORT=1895...",
+          "line": 17,
+          "specs": [
+            "server.mjs:9",
+            "server.mjs:18-22",
+            "server.mjs:35-36"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 9,
+                "end": 9,
+                "hash": "2ba914902c7d7a18b52a6c91c35a6aca17591029"
+              }
+            },
+            "server.mjs:18-22": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 18,
+                "end": 22,
+                "hash": "bc06d4a58e2f4605bccfb32cb0488ef31cd38276"
+              }
+            },
+            "server.mjs:35-36": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 35,
+                "end": 36,
+                "hash": "657e92e49f76856ef8d693a68b2a732ee2e81c31"
+              }
+            }
+          }
+        },
+        "be972935390d": {
+          "text": "Check, as CI runs it: `node --check server.mjs`, `bash -n setup.sh`, then a smoke run that expects 401 for a bad secret and 201 for a good one, on Node 22 an...",
+          "line": 18,
+          "specs": [
+            ".github/workflows/ci.yml:10-37"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            ".github/workflows/ci.yml": {
+              "path": ".github/workflows/ci.yml",
+              "blob": "658498b49ad36d103ed15015974533138ef7b1b6",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 10,
+                "end": 37,
+                "hash": "385868e6145f4e8b35768fa83527e88a0ae5de2a"
+              }
+            }
+          }
+        },
+        "402d4d15ff57": {
+          "text": "Install as a user service: `bash setup.sh` creates `.env` from `.env.example` if missing, copies `feedback-loop.service` into the systemd user dir and enable...",
+          "line": 19,
+          "specs": [
+            "setup.sh:11-48"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "setup.sh": {
+              "path": "setup.sh",
+              "blob": "1dd2107d63f63ba6ba58406984e57f3c3a662302",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746",
+              "range": {
+                "start": 11,
+                "end": 48,
+                "hash": "5a3585bbe18775eb783cef9632ee44ab802b20a3"
+              }
+            }
+          }
+        },
+        "874ebe060974": {
+          "text": "Restart after a code change: `systemctl --user restart feedback-loop`. Logs: `journalctl --user -u feedback-loop`.",
+          "line": 20,
+          "specs": [
+            "feedback-loop.service:9-12"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "feedback-loop.service": {
+              "path": "feedback-loop.service",
+              "blob": "b2f0801543efaf9e4df6462479507b7282cf1c54",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746",
+              "range": {
+                "start": 9,
+                "end": 12,
+                "hash": "49092e13840108a8c955502eb53dcf7060e6dff1"
+              }
+            }
+          }
+        },
+        "7a790e8f66cd": {
+          "text": "The whole service is `server.mjs`: Node built-ins only (`node:http`, `node:sqlite`, `node:child_process`, `node:crypto`). Keep it one file with no dependencies.",
+          "line": 24,
+          "specs": [
+            "server.mjs:1-7",
+            "README.md:111-113"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 1,
+                "end": 7,
+                "hash": "583d1a43f5691014c187113f25fc32c825b6fd19"
+              }
+            },
+            "README.md": {
+              "path": "README.md",
+              "blob": "13167b90d15ad3d51e4774dc393682f7f09fdeec",
+              "commit": "b26bfd8a35b64156a2044c01eb71e06c4a0403ab",
+              "range": {
+                "start": 111,
+                "end": 113,
+                "hash": "1a32c9b9ea63706cdcee5388317df03a968ed729"
+              }
+            }
+          }
+        },
+        "e63a689775cb": {
+          "text": "The status page HTML and CSS are inlined in a template string, not a frontend folder.",
+          "line": 25,
+          "specs": [
+            "server.mjs:193-241"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 193,
+                "end": 241,
+                "hash": "dd9c4359448282d9297bfcda1c1f99a75e890389"
+              }
+            }
+          }
+        },
+        "32698b953239": {
+          "text": "Config is env vars only: `FEEDBACK_LOOP_PORT`, `FEEDBACK_LOOP_SECRET`, `CLAUDE_PATH`, `CLAUDE_TIMEOUT_S`, `CLAUDE_SKIP_PERMISSIONS`. New ones go in `.env.exa...",
+          "line": 26,
+          "specs": [
+            "server.mjs:18-24",
+            ".env.example"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 18,
+                "end": 24,
+                "hash": "98ceed2b21c86d5d3bd925b3ab30203aff416f9f"
+              }
+            },
+            ".env.example": {
+              "path": ".env.example",
+              "blob": "2301af1e5b34ec0811afacd790784760b9478c09",
+              "commit": "a87b63e718e7c5929a17973f2c3e27b6ac2d18e3"
+            }
+          }
+        },
+        "2e44a5d57e75": {
+          "text": "Spawn Claude Code with `spawn`, never `exec` or `execFile`, so long output streams instead of buffering.",
+          "line": 27,
+          "specs": [
+            "server.mjs:98-102"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 98,
+                "end": 102,
+                "hash": "2fa5f5027464ae169c06961b0e79a65570aa33e0"
+              }
+            }
+          }
+        },
+        "47810b9f795e": {
+          "text": "`GET /` serves only the header: the `replace` chain at the route cuts the HTML from the first `\\n<div id=\"jobs\">` to the end, which drops the job list and th...",
+          "line": 31,
+          "specs": [
+            "server.mjs:255-262"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 255,
+                "end": 262,
+                "hash": "0ceabaf517c2c65f24fca0f9aca13434b802561b"
+              }
+            }
+          }
+        },
+        "faefa76a76b5": {
+          "text": "A job left `running` when the process stops stays `running` for good: nothing resets it at startup, the worker only picks `pending` rows, and it still counts...",
+          "line": 32,
+          "specs": [
+            "server.mjs:53",
+            "server.mjs:68-75",
+            "server.mjs:273-274"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 53,
+                "end": 53,
+                "hash": "4ad8883ea6413e77b6698889e2fb3afec601a37b"
+              }
+            },
+            "server.mjs:68-75": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 68,
+                "end": 75,
+                "hash": "5f8690aa02c868bee4782e774ae92dee4e5b0b39"
+              }
+            },
+            "server.mjs:273-274": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 273,
+                "end": 274,
+                "hash": "a2f30b856b481dfe193128d28559dbec3f16dbde"
+              }
+            }
+          }
+        },
+        "bde70af81bc5": {
+          "text": "A relative `repo` resolves against the feedback-loop folder, not the caller's. `~` falls back to `/home/kd` when `HOME` is unset.",
+          "line": 33,
+          "specs": [
+            "server.mjs:55-60"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 55,
+                "end": 60,
+                "hash": "4a2903b5a6498fffb811368afb6683c8acae7c12"
+              }
+            }
+          }
+        },
+        "12d18ed636af": {
+          "text": "Bad or missing JSON in a POST body parses to `{}` and returns 401, not 400. There is no body size limit.",
+          "line": 34,
+          "specs": [
+            "server.mjs:131-139",
+            "server.mjs:265-271"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 131,
+                "end": 139,
+                "hash": "69cf4084e667a8ffa5572db4291a8a6c915a105b"
+              }
+            },
+            "server.mjs:265-271": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 265,
+                "end": 271,
+                "hash": "656bfdd9e11a65b32899ca8f2f4b2dbd0c7c2107"
+              }
+            }
+          }
+        },
+        "28ffa23d3c38": {
+          "text": "A failed run keeps the first 2000 chars of stderr; a completed run keeps the first 8000 chars of stdout, so a long JSON result is stored truncated and the pa...",
+          "line": 35,
+          "specs": [
+            "server.mjs:110-118",
+            "server.mjs:185-191"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 110,
+                "end": 118,
+                "hash": "f96610bb78d7204f16e0c021074f7470fa580a56"
+              }
+            },
+            "server.mjs:185-191": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 185,
+                "end": 191,
+                "hash": "b8870077c8ef21a021fa472e80a25db0a807df6d"
+              }
+            }
+          }
+        },
+        "d8293bd0fa4c": {
+          "text": "A timeout kills the run and records it as failed with `claude exited with code null` when stderr is empty.",
+          "line": 36,
+          "specs": [
+            "server.mjs:99-112"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 99,
+                "end": 112,
+                "hash": "23f9a306964340725dd2d1af00d0cafcc7272d3c"
+              }
+            }
+          }
+        },
+        "e99f49fce775": {
+          "text": "The repo's unit runs bare `node`, which systemd resolves only from its own fixed path list, not `~/.local/bin` or an fnm or nvm shim. `setup.sh` installs the...",
+          "line": 37,
+          "specs": [
+            "feedback-loop.service:7",
+            "setup.sh:44-46"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "feedback-loop.service": {
+              "path": "feedback-loop.service",
+              "blob": "b2f0801543efaf9e4df6462479507b7282cf1c54",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746",
+              "range": {
+                "start": 7,
+                "end": 7,
+                "hash": "4d4726b515fbcd5deceec8d8fcf437c4b7f64890"
+              }
+            },
+            "setup.sh": {
+              "path": "setup.sh",
+              "blob": "1dd2107d63f63ba6ba58406984e57f3c3a662302",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746",
+              "range": {
+                "start": 44,
+                "end": 46,
+                "hash": "d9eb72a92d68b20d0f13b1ecc63f7d5a94bf4cb4"
+              }
+            }
+          }
+        },
+        "6ee784045d36": {
+          "text": "`setup.sh`'s Node check accepts any 22.x, below the 22.5 that `node:sqlite` needs, and always prints port 8956 whatever `.env` sets.",
+          "line": 38,
+          "specs": [
+            "setup.sh:33-36",
+            "setup.sh:51-55"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "setup.sh": {
+              "path": "setup.sh",
+              "blob": "1dd2107d63f63ba6ba58406984e57f3c3a662302",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746",
+              "range": {
+                "start": 33,
+                "end": 36,
+                "hash": "dd1f5b919ce1252e555590e5772f47d0790c50f3"
+              }
+            },
+            "setup.sh:51-55": {
+              "path": "setup.sh",
+              "blob": "1dd2107d63f63ba6ba58406984e57f3c3a662302",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746",
+              "range": {
+                "start": 51,
+                "end": 55,
+                "hash": "866eadf36bd8b420e27fad799c838796ade2f58e"
+              }
+            }
+          }
+        },
+        "a5689c388dc0": {
+          "text": "Anyone with the secret can make Claude Code edit and run commands in any path the service user can reach, and `CLAUDE_SKIP_PERMISSIONS=true` adds `--dangerou...",
+          "line": 39,
+          "specs": [
+            "SECURITY.md:7-10",
+            "server.mjs:62-66",
+            "server.mjs:294"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "SECURITY.md": {
+              "path": "SECURITY.md",
+              "blob": "96d2c91ccec53a7df2b998dd58db67c5d30f6cac",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 7,
+                "end": 10,
+                "hash": "7d10c0bac20b149d7ee35790785b1c7f084c25cc"
+              }
+            },
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 62,
+                "end": 66,
+                "hash": "40d092024942c8b521b13428a745de2c2204f4e9"
+              }
+            },
+            "server.mjs:294-294": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 294,
+                "end": 294,
+                "hash": "8d10fb05bffb1268527f28fd2526fe7c75c2b714"
+              }
+            }
+          }
+        }
+      },
+      "pinnedAt": "2026-11-22T09:02:24.618Z",
+      "head": "7de4121fc47700c319db3e61eff8d29a3600d851"
+    },
+    "feedback-loop-architecture": {
+      "claims": {
+        "c5d09a06cce5": {
+          "text": "One Node process, `server.mjs`, on 127.0.0.1:8956: a `node:http` server, a `node:sqlite` queue and an in-process worker on a 5 s timer that spawns the Claude...",
+          "line": 11,
+          "specs": [
+            "server.mjs:1-7",
+            "server.mjs:18",
+            "server.mjs:129",
+            "server.mjs:294"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 1,
+                "end": 7,
+                "hash": "583d1a43f5691014c187113f25fc32c825b6fd19"
+              }
+            },
+            "server.mjs:18-18": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 18,
+                "end": 18,
+                "hash": "e2124978be9b35bb7c1fabc4c992c1b0f28cad89"
+              }
+            },
+            "server.mjs:129-129": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 129,
+                "end": 129,
+                "hash": "bfe5e783fc6c36090353729e1d078fa71cbe9de0"
+              }
+            },
+            "server.mjs:294-294": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 294,
+                "end": 294,
+                "hash": "8d10fb05bffb1268527f28fd2526fe7c75c2b714"
+              }
+            }
+          }
+        },
+        "ffd85a3f504a": {
+          "text": "`server.mjs`: env loading, the SQLite schema, the worker (`tick`), the HTML renderer (`renderJobs`) and the router (`route`).",
+          "line": 25,
+          "specs": [
+            "server.mjs:9-16",
+            "server.mjs:38-51",
+            "server.mjs:68-127",
+            "server.mjs:146-170",
+            "server.mjs:250-292"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 9,
+                "end": 16,
+                "hash": "cd5519fedfa1f852769a0931daa39e3546394b92"
+              }
+            },
+            "server.mjs:38-51": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 38,
+                "end": 51,
+                "hash": "261a5c4b69b490e4076bab8103a6d6492906e98e"
+              }
+            },
+            "server.mjs:68-127": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 68,
+                "end": 127,
+                "hash": "47c809aadcb3da7294698cd0f352df0d7e1a0f29"
+              }
+            },
+            "server.mjs:146-170": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 146,
+                "end": 170,
+                "hash": "24d327d73a14b51c0f8f8ffdef544458d4cf81b6"
+              }
+            },
+            "server.mjs:250-292": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 250,
+                "end": 292,
+                "hash": "bfa2dedf1f7a060369d8e56420f0810a19d75dc0"
+              }
+            }
+          }
+        },
+        "1d2b918f0ae4": {
+          "text": "`feedback-loop.service`: systemd user unit, `Restart=always`.",
+          "line": 26,
+          "specs": [
+            "feedback-loop.service"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "feedback-loop.service": {
+              "path": "feedback-loop.service",
+              "blob": "b2f0801543efaf9e4df6462479507b7282cf1c54",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746"
+            }
+          }
+        },
+        "ba92a1edaf47": {
+          "text": "`setup.sh`: first-run installer for `.env` and the unit.",
+          "line": 27,
+          "specs": [
+            "setup.sh"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "setup.sh": {
+              "path": "setup.sh",
+              "blob": "1dd2107d63f63ba6ba58406984e57f3c3a662302",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746"
+            }
+          }
+        },
+        "4923c396f243": {
+          "text": "`.github/workflows/ci.yml`: syntax check and smoke run on push to main and on PRs.",
+          "line": 28,
+          "specs": [
+            ".github/workflows/ci.yml"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            ".github/workflows/ci.yml": {
+              "path": ".github/workflows/ci.yml",
+              "blob": "658498b49ad36d103ed15015974533138ef7b1b6",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28"
+            }
+          }
+        },
+        "2ae451b54d60": {
+          "text": "`POST /api/job`: parse the JSON body, check the secret, require `title`, `description` and `repo`, refuse at 30 pending or running, insert a `pending` row an...",
+          "line": 32,
+          "specs": [
+            "server.mjs:265-281"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 265,
+                "end": 281,
+                "hash": "01e2ef4aea6ab2fa91411b0b4d9875e50ce5afff"
+              }
+            }
+          }
+        },
+        "e9b91078f85c": {
+          "text": "Worker: when idle, take the oldest `pending` row, mark it `running`, resolve `repo` (`~` to `HOME`, relative to the server folder), fail it if the path is mi...",
+          "line": 33,
+          "specs": [
+            "server.mjs:68-102",
+            "server.mjs:55-60"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 68,
+                "end": 102,
+                "hash": "a6f15101cafdac360286946d7f0a62009578c242"
+              }
+            },
+            "server.mjs:55-60": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 55,
+                "end": 60,
+                "hash": "4a2903b5a6498fffb811368afb6683c8acae7c12"
+              }
+            }
+          }
+        },
+        "d863d0e36049": {
+          "text": "On exit: code 0 marks it `completed` with the `session_id` parsed from stdout and up to 8000 chars of stdout; anything else marks it `failed` with up to 2000...",
+          "line": 34,
+          "specs": [
+            "server.mjs:108-126"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 108,
+                "end": 126,
+                "hash": "3de39ed937ab8b2e2b30d6de98c1851e19509494"
+              }
+            }
+          }
+        },
+        "c54ae5f02dfa": {
+          "text": "Status: `GET /api/jobs` returns the last 30 jobs as an HTML fragment; `GET /` returns the page shell.",
+          "line": 35,
+          "specs": [
+            "server.mjs:146-170",
+            "server.mjs:255-262",
+            "server.mjs:283-288"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 146,
+                "end": 170,
+                "hash": "24d327d73a14b51c0f8f8ffdef544458d4cf81b6"
+              }
+            },
+            "server.mjs:255-262": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 255,
+                "end": 262,
+                "hash": "0ceabaf517c2c65f24fca0f9aca13434b802561b"
+              }
+            },
+            "server.mjs:283-288": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 283,
+                "end": 288,
+                "hash": "cfb8de42fa3293c83c51c28511a974e1d73545fe"
+              }
+            }
+          }
+        },
+        "960c2532afeb": {
+          "text": "`data/feedback-loop.db`, SQLite in WAL mode, created beside `server.mjs`, gitignored. One table, `jobs`: id, kind (bug or error), title, description, repo_pa...",
+          "line": 39,
+          "specs": [
+            "server.mjs:35-51",
+            ".gitignore"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 35,
+                "end": 51,
+                "hash": "9dd2da87c36fa16f6896b2160a7bbc1a4727dd0e"
+              }
+            },
+            ".gitignore": {
+              "path": ".gitignore",
+              "blob": "eff64199aeea985a5b21941e0aac65eb6e40e82a",
+              "commit": "a87b63e718e7c5929a17973f2c3e27b6ac2d18e3"
+            }
+          }
+        },
+        "cd8b7b99f5d0": {
+          "text": "`.env` beside `server.mjs`, gitignored.",
+          "line": 40,
+          "specs": [
+            "server.mjs:10-16",
+            ".gitignore"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 10,
+                "end": 16,
+                "hash": "c60e20bb52308112af9e70fa769c9ef215c675a9"
+              }
+            },
+            ".gitignore": {
+              "path": ".gitignore",
+              "blob": "eff64199aeea985a5b21941e0aac65eb6e40e82a",
+              "commit": "a87b63e718e7c5929a17973f2c3e27b6ac2d18e3"
+            }
+          }
+        },
+        "9c507f957e19": {
+          "text": "`POST /api/job` needs `secret` in the body to equal `FEEDBACK_LOOP_SECRET`, compared with `timingSafeEqual`. `GET /` and `GET /api/jobs` have no auth: the 12...",
+          "line": 44,
+          "specs": [
+            "server.mjs:243-248",
+            "server.mjs:255-288",
+            "server.mjs:294"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 243,
+                "end": 248,
+                "hash": "62c028a8b9823b8db99ef135e92404873ae4df39"
+              }
+            },
+            "server.mjs:255-288": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 255,
+                "end": 288,
+                "hash": "a79472a9622d26ea5f48ced75e47254a38f46f4e"
+              }
+            },
+            "server.mjs:294-294": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 294,
+                "end": 294,
+                "hash": "8d10fb05bffb1268527f28fd2526fe7c75c2b714"
+              }
+            }
+          }
+        },
+        "17ebd1fcd781": {
+          "text": "Claude Code CLI (`CLAUDE_PATH`, default `claude`), spawned per job; it does its own network calls and auth. The server makes no network requests itself.",
+          "line": 48,
+          "specs": [
+            "server.mjs:22",
+            "server.mjs:98-102",
+            "SECURITY.md:12"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 22,
+                "end": 22,
+                "hash": "6cf4d72356b67468485c6208f3dcedbf0116d3a6"
+              }
+            },
+            "server.mjs:98-102": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 98,
+                "end": 102,
+                "hash": "2fa5f5027464ae169c06961b0e79a65570aa33e0"
+              }
+            },
+            "SECURITY.md": {
+              "path": "SECURITY.md",
+              "blob": "96d2c91ccec53a7df2b998dd58db67c5d30f6cac",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 12,
+                "end": 12,
+                "hash": "9db8acb4e0c7334d7458b41a92e3dfe42464fab3"
+              }
+            }
+          }
+        }
+      },
+      "pinnedAt": "2026-11-22T09:02:24.639Z",
+      "head": "7de4121fc47700c319db3e61eff8d29a3600d851"
+    },
+    "feedback-loop-prd": {
+      "claims": {
+        "c7c826d577ab": {
+          "text": "**[shipped]** `POST /api/job` takes `title`, `description`, `repo`, `secret`, and optional `kind` (`bug` by default, or `error`) and `source`; returns 201 wi...",
+          "line": 21,
+          "specs": [
+            "server.mjs:265-281",
+            "README.md:51-76"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 265,
+                "end": 281,
+                "hash": "01e2ef4aea6ab2fa91411b0b4d9875e50ce5afff"
+              }
+            },
+            "README.md": {
+              "path": "README.md",
+              "blob": "13167b90d15ad3d51e4774dc393682f7f09fdeec",
+              "commit": "b26bfd8a35b64156a2044c01eb71e06c4a0403ab",
+              "range": {
+                "start": 51,
+                "end": 76,
+                "hash": "7afd0004dd0b41e4f4d7b007ed7f16afdd15792e"
+              }
+            }
+          }
+        },
+        "e95e08da188a": {
+          "text": "**[shipped]** Shared-secret check in constant time; a wrong or missing secret gets 401.",
+          "line": 22,
+          "specs": [
+            "server.mjs:243-248",
+            "server.mjs:267"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 243,
+                "end": 248,
+                "hash": "62c028a8b9823b8db99ef135e92404873ae4df39"
+              }
+            },
+            "server.mjs:267-267": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 267,
+                "end": 267,
+                "hash": "e3efcbf5f4b1e69e67f2b5aa1f703c317c7b2797"
+              }
+            }
+          }
+        },
+        "cccf409cfe15": {
+          "text": "**[shipped]** Queue cap: 429 once 30 jobs are pending or running.",
+          "line": 23,
+          "specs": [
+            "server.mjs:273-274"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 273,
+                "end": 274,
+                "hash": "a2f30b856b481dfe193128d28559dbec3f16dbde"
+              }
+            }
+          }
+        },
+        "95212e85cda4": {
+          "text": "**[shipped]** Worker checks the queue every 5 s and runs one job at a time, oldest first, as `claude -p --output-format json --allowedTools Read,Edit,Bash,Gr...",
+          "line": 24,
+          "specs": [
+            "server.mjs:23",
+            "server.mjs:62-66",
+            "server.mjs:68-129"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 23,
+                "end": 23,
+                "hash": "4cba1be0648c9bb57aa40b72192d61d4ed5f6c49"
+              }
+            },
+            "server.mjs:62-66": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 62,
+                "end": 66,
+                "hash": "40d092024942c8b521b13428a745de2c2204f4e9"
+              }
+            },
+            "server.mjs:68-129": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 68,
+                "end": 129,
+                "hash": "b35b890428bb8ae88227725a1a89fe3fc7272667"
+              }
+            }
+          }
+        },
+        "2ef2da0a5dce": {
+          "text": "**[shipped]** The prompt asks Claude Code to investigate, fix the root cause, verify and commit without unrelated changes; an `error` job adds a line to work...",
+          "line": 25,
+          "specs": [
+            "server.mjs:85-93"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 85,
+                "end": 93,
+                "hash": "4e0216d81d76e8fec5852aef8cd8acbd484665ed"
+              }
+            }
+          }
+        },
+        "a3bc637fbaf1": {
+          "text": "**[shipped]** Records the Claude Code `session_id`, result or error per job.",
+          "line": 26,
+          "specs": [
+            "server.mjs:108-118"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 108,
+                "end": 118,
+                "hash": "dd5d9e3efe93d581a35d8a504c0fece06916474c"
+              }
+            }
+          }
+        },
+        "814174226241": {
+          "text": "**[shipped]** Optional unattended mode: `CLAUDE_SKIP_PERMISSIONS=true` adds `--dangerously-skip-permissions`.",
+          "line": 27,
+          "specs": [
+            "server.mjs:24",
+            "server.mjs:64"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 24,
+                "end": 24,
+                "hash": "0ef80f2260fd5f7d6fd15f851caf81aaba750f7d"
+              }
+            },
+            "server.mjs:64-64": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 64,
+                "end": 64,
+                "hash": "70c989ea2feb283b96deb34874e0231e64b24772"
+              }
+            }
+          }
+        },
+        "3f09489e08a3": {
+          "text": "**[shipped]** Startup check warns when the Claude Code CLI is missing; jobs fail until it is installed.",
+          "line": 28,
+          "specs": [
+            "server.mjs:26-33"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 26,
+                "end": 33,
+                "hash": "b744a686c0e5ea93b4cefa0b46ed90d3f880fde0"
+              }
+            }
+          }
+        },
+        "cca946e17fef": {
+          "text": "**[partial]** Status page: `GET /api/jobs` renders the last 30 jobs with counts, status badges, errors and an expandable result, but `GET /` drops the job li...",
+          "line": 29,
+          "specs": [
+            "server.mjs:146-170",
+            "server.mjs:193-241",
+            "server.mjs:255-262"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "server.mjs": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 146,
+                "end": 170,
+                "hash": "24d327d73a14b51c0f8f8ffdef544458d4cf81b6"
+              }
+            },
+            "server.mjs:193-241": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 193,
+                "end": 241,
+                "hash": "dd9c4359448282d9297bfcda1c1f99a75e890389"
+              }
+            },
+            "server.mjs:255-262": {
+              "path": "server.mjs",
+              "blob": "13234b4b2c40dc318f98f8e7529ca109615d4e30",
+              "commit": "df659af63d83604dfeee0336e40d5d9f5a2f2a28",
+              "range": {
+                "start": 255,
+                "end": 262,
+                "hash": "0ceabaf517c2c65f24fca0f9aca13434b802561b"
+              }
+            }
+          }
+        },
+        "3969e6755f03": {
+          "text": "**[shipped]** `setup.sh` installs and enables the systemd user unit.",
+          "line": 30,
+          "specs": [
+            "setup.sh",
+            "feedback-loop.service"
+          ],
+          "head": "7de4121fc47700c319db3e61eff8d29a3600d851",
+          "files": {
+            "setup.sh": {
+              "path": "setup.sh",
+              "blob": "1dd2107d63f63ba6ba58406984e57f3c3a662302",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746"
+            },
+            "feedback-loop.service": {
+              "path": "feedback-loop.service",
+              "blob": "b2f0801543efaf9e4df6462479507b7282cf1c54",
+              "commit": "d720afa73f02b60c5ae1623b4ed3fe701e0e1746"
+            }
+          }
+        }
+      },
+      "pinnedAt": "2026-11-22T09:02:24.657Z",
+      "head": "7de4121fc47700c319db3e61eff8d29a3600d851"
+    }
+  }
+}
